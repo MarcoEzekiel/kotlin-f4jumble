@@ -3,39 +3,33 @@
  */
 package cash.z.f4jumble
 
+import com.google.gson.Gson
 import java.io.File
 import kotlin.test.Test
-import kotlin.test.assertNotNull
 import kotlin.test.assertEquals
-import kotlin.math.E
-import com.google.gson.*
-import cash.z.f4jumble.F4jumble
- 
 
-class TestVector(  
+class TestVector(
     val normal: String,
-    val jumbled: String
-) 
+    val jumbled: String,
+)
+
 // test f4jumble and its inverse f4jumbleinv
 class F4jumbleTest {
-    
     @Test
     @OptIn(ExperimentalStdlibApi::class)
     fun vectorsjumblecorrectlytest() {
-        
         val jsonFile = File("src/test/resources/testVectors.json")
         val jsonString = jsonFile.readText()
         val vectors = Gson().fromJson(jsonString, Array<TestVector>::class.java)
-        for ( vector in vectors){ 
+        for (vector in vectors) {
             var normalV = vector.normal.hexToByteArray()
             var jumbled = F4jumble.f4Jumble(normalV)
-            
+
             val jumbledV = vector.jumbled.hexToByteArray()
             var normal = F4jumble.f4JumbleInv(jumbledV)
 
-            assertEquals(jumbledV.toHexString(),jumbled.toHexString())
-            assertEquals(normalV.toHexString(),normal.toHexString())
+            assertEquals(jumbledV.toHexString(), jumbled.toHexString())
+            assertEquals(normalV.toHexString(), normal.toHexString())
         }
     }
-
 }

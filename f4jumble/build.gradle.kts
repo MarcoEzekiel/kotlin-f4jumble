@@ -7,6 +7,8 @@ plugins {
     `java-library`
 
     id("org.jetbrains.dokka") version "1.9.20"
+
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
 }
 
 repositories {
@@ -22,16 +24,14 @@ dependencies {
     testImplementation(libs.junit.jupiter.engine)
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation(libs.guava) 
+    implementation(libs.guava)
     // for parsing json test vectors
     implementation("com.google.code.gson:gson:2.8.5")
-
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     implementation("com.rfksystems:blake2b:2.0.0")
 
- 
     testImplementation(kotlin("test"))
 }
 

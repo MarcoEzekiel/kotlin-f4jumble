@@ -29,61 +29,70 @@
 package cash.z.f4jumble
 
 import com.rfksystems.blake2b.Blake2b
-import kotlin.math.min
 import kotlin.jvm.JvmStatic
+import kotlin.math.min
 
-private const val minLenM = 48
-private const val maxLenM = 4194368
-private const val lenH = 64
+private const val MIN_LEN_M = 48
+private const val MAX_LEN_M = 4194368
+private const val LEN_H = 64
 
 public object F4jumble {
-    private fun ceilDiv(num: Int, den: Int): Int {
+    private fun ceilDiv(
+        num: Int,
+        den: Int,
+    ): Int {
         return (num + den - 1) / den
     }
 
     private fun hPers(i: Int): ByteArray {
         return byteArrayOf(
-                85,
-                65,
-                95,
-                70,
-                52,
-                74,
-                117,
-                109,
-                98,
-                108,
-                101,
-                95,
-                72,
-                i.toByte(),
-                0,
-                0
+            85,
+            65,
+            95,
+            70,
+            52,
+            74,
+            117,
+            109,
+            98,
+            108,
+            101,
+            95,
+            72,
+            i.toByte(),
+            0,
+            0,
         )
     }
 
-    private fun gPers(i: Int, j: Int): ByteArray {
+    private fun gPers(
+        i: Int,
+        j: Int,
+    ): ByteArray {
         return byteArrayOf(
-                85,
-                65,
-                95,
-                70,
-                52,
-                74,
-                117,
-                109,
-                98,
-                108,
-                101,
-                95,
-                71,
-                i.toByte(),
-                (j and 0xff).toByte(),
-                (j shr 8).toByte()
+            85,
+            65,
+            95,
+            70,
+            52,
+            74,
+            117,
+            109,
+            98,
+            108,
+            101,
+            95,
+            71,
+            i.toByte(),
+            (j and 0xff).toByte(),
+            (j shr 8).toByte(),
         )
     }
 
-    private fun xor(x: ByteArray, y: ByteArray): ByteArray {
+    private fun xor(
+        x: ByteArray,
+        y: ByteArray,
+    ): ByteArray {
         val result = ByteArray(x.size)
         for (i in x.indices) {
             if (i < y.size) {
@@ -93,9 +102,13 @@ public object F4jumble {
         return result
     }
 
-    private fun gRound(i: Int, u: ByteArray, lenR: Int): ByteArray {
+    private fun gRound(
+        i: Int,
+        u: ByteArray,
+        lenR: Int,
+    ): ByteArray {
         fun inner(j: Int): ByteArray {
-            val g = Blake2b(null, lenH, null, gPers(i, j))
+            val g = Blake2b(null, LEN_H, null, gPers(i, j))
 
             g.update(u, 0, u.size)
 
@@ -105,14 +118,18 @@ public object F4jumble {
         }
 
         val result = mutableListOf<Byte>()
-        for (j in 0 until ceilDiv(lenR, lenH)) {
+        for (j in 0 until ceilDiv(lenR, LEN_H)) {
             val hash = inner(j)
             result.addAll(hash.toList())
         }
         return result.toByteArray().copyOf(lenR)
     }
 
-    private fun hRound(i: Int, u: ByteArray, lenL: Int): ByteArray {
+    private fun hRound(
+        i: Int,
+        u: ByteArray,
+        lenL: Int,
+    ): ByteArray {
         val h = Blake2b(null, lenL, null, hPers(i))
 
         h.update(u, 0, u.size)
@@ -122,18 +139,19 @@ public object F4jumble {
 
         return out
     }
-    /** 
-    * Encodes the given ByteArray using F4Jumble, and returns the encoded message as []byte.
-    * Returns an error if the message is an invalid length.
-    */
+
+    /**
+     * Encodes the given ByteArray using F4Jumble, and returns the encoded message as []byte.
+     * Returns an error if the message is an invalid length.
+     */
     @JvmStatic
     fun f4Jumble(m: ByteArray): ByteArray {
         val lenM = m.size
-        if (lenM < minLenM || lenM > maxLenM) {
+        if (lenM < MIN_LEN_M || lenM > MAX_LEN_M) {
             throw IllegalArgumentException("Invalid message length")
         }
 
-        val lenL = min(lenH, lenM / 2)
+        val lenL = min(LEN_H, lenM / 2)
         val lenR = lenM - lenL
 
         val a = m.copyOfRange(0, lenL)
@@ -154,10 +172,10 @@ public object F4jumble {
     @JvmStatic
     fun f4JumbleInv(m: ByteArray): ByteArray {
         val lenM = m.size
-        if (lenM < minLenM || lenM > maxLenM) {
+        if (lenM < MIN_LEN_M || lenM > MAX_LEN_M) {
             throw IllegalArgumentException("Invalid message length")
         }
-        val lenL = min(lenH, lenM / 2)
+        val lenL = min(LEN_H, lenM / 2)
         val lenR = lenM - lenL
 
         val c = m.copyOfRange(0, lenL)
